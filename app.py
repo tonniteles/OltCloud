@@ -6,16 +6,17 @@ api = API_OltCloud.OltCloudAPI()
 
 st.set_page_config(page_title="Consulta de ONU/ONT por Contrato", layout="wide")
 st.title("🔍 Consulta de ONU/ONT por Contrato")
-client_pppoe = st.text_input("Entre com o número do contrato")
+input_text= st.text_input("Entre com o número do contrato")
 if st.button("Buscar ONU/ONT"):
-    onu_info = api.get_ont(api.get_ontID_by_login(client_pppoe))
+    onu_info = api.get_ont(api.get_ontID_by_contrato(input_text))
+    #print(onu_info)
     onu_info = onu_info['equipment'] if onu_info else None
-    print(json.dumps(onu_info, indent=3))
+    #print(json.dumps(onu_info, indent=3))
     if onu_info:
         st.subheader("Infomações da ONU/ONT (OLTCLOUD):")
         #st.json(onu_info)
         st.write(f'''
-                 Contrato: {client_pppoe}<br>
+                 Contrato: {input_text}<br>
                  Serial Number: {onu_info['serial_number']}<br>
                  ONU ID: {onu_info['id']}<br>
                  Device Alias: {onu_info['device_alias']}<br>

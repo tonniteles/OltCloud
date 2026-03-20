@@ -36,12 +36,13 @@ class OltCloudAPI:
         except FileNotFoundError:
             return []
 
-    def get_ontID_by_login(self, client_pppoe):
+    def get_ontID_by_contrato(self, contrato):
         for ont in self.onts:
-            if ont['client_pppoe'].split('-')[0] == client_pppoe:
-                return ont['id']
+            device_alias = ont.get('device_alias')
+            if device_alias and device_alias.split('-')[0] == contrato:
+                return ont.get('id')
         return None
-
+         
     def get_ont(self, ont_id):
         endpoint = '/api/v2/ftth/equipment/{id}'.format(id=ont_id)
         resquest_url = f"{self.url}{endpoint}"
