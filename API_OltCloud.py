@@ -25,8 +25,6 @@ class OltCloudAPI:
             'password': self.password
         }
         response = requests.post(request_url, json=user_api)
-        print("STATUS:", response.status_code)
-        print("BODY:", response.text)
         response.raise_for_status()
         return response.json()['access']
 
