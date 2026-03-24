@@ -36,13 +36,23 @@ class OltCloudAPI:
         except FileNotFoundError:
             return []
 
-    def get_ontID_by_contrato(self, contrato):
-        for ont in self.onts:
-            device_alias = ont.get('device_alias')
-            if device_alias and device_alias.split('-')[0] == contrato:
-                return ont.get('id')
+    def get_ontID(self, input_value, search_type):
+        match search_type:
+            case 'device_alias':
+                for ont in self.onts:
+                    device_alias = ont.get('device_alias')
+                    if device_alias and device_alias.split('-')[0] == input_value:
+                        return ont.get('id')
+            case 'serial':
+                for ont in self.onts:
+                    if ont.get('serial_number') == input_value:
+                        return ont.get('id')
+            case 'mac':
+                for ont in self.onts:
+                    if input_value in ont.get('macs', []):
+                        return ont.get('id')
         return None
-         
+
     def get_ont(self, ont_id):
         endpoint = '/api/v2/ftth/equipment/{id}'.format(id=ont_id)
         resquest_url = f"{self.url}{endpoint}"
