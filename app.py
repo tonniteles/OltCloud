@@ -28,6 +28,7 @@ if submit_button:
             search_type = 'mac'
 
     if not input_text:
+        onu_info = None
         st.error("Por favor, insira um valor para a busca.")
     else:
         onu_info = api.get_ont(api.get_ontID(input_text, search_type))
