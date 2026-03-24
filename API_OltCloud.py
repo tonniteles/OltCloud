@@ -7,14 +7,14 @@ load_dotenv()
 
 class OltCloudAPI:
     def __init__(self):
-        self.url = os.environ.get("URL")
-        self.username = os.environ.get("USER")
-        self.password = os.environ.get("PASS")
+        self.url = os.environ.get("API_URL")
+        self.username = os.environ.get("API_USER")
+        self.password = os.environ.get("API_PASS")
         self.token = self.get_token()
         self.headers = {
-                            'Authorization': f'Bearer {self.token}',
-                            'Content-Type': 'application/json'
-                        }
+            'Authorization': f'Bearer {self.token}',
+            'Content-Type': 'application/json'
+        }
         self.onts = self.get_ontslist()
 
     def get_token(self):
@@ -22,8 +22,7 @@ class OltCloudAPI:
         request_url = f"{self.url}{endpoint}"
         user_api = {
             'username': self.username,
-            'password': self.password,
-            'Content-Type': 'application/json'
+            'password': self.password
         }
         response = requests.post(request_url, json=user_api)
         response.raise_for_status()
