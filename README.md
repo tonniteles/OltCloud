@@ -1,4 +1,4 @@
-For install:
+For Install:
 -
 git clone https://github.com/tonniteles/OltCloud 
 
@@ -20,7 +20,7 @@ API_PASS=api.pass
 cat -A .env  
 sed -i 's/\r$//' .env  
 
-Script to start 
+Script to Start 
 -
 #!/bin/bash
 source .venv/bin/activate  
