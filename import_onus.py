@@ -9,4 +9,4 @@ while True:
   onts = api.get_all_onts()
   with open('onts.json', 'w') as outfile:
       json.dump(onts, outfile)
-  time.sleep(30)
+  time.sleep(120)
