@@ -7,27 +7,94 @@ load_dotenv()
 
 class OltCloudAPI:
     def __init__(self):
-        self.url = os.environ.get("API_URL")
-        self.username = os.environ.get("API_USER")
-        self.password = os.environ.get("API_PASS")
-        self.token = self.get_token()
+        self.url = os.environ.get("API_URL").split()[0] if os.environ.get("API_URL") is not None else ""
+        self.username = os.environ.get("API_USER").split()[0] if os.environ.get("API_USER") is not None else ""
+        self.password = os.environ.get("API_PASS").split()[0] if os.environ.get("API_PASS") is not None else ""
+        #self.token = self.get_token()
+        self.access_token = None
+        self.refresh_token = None
+        self.authenticate()
         self.headers = {
-            'Authorization': f'Bearer {self.token}',
+            'Authorization': f'Bearer {self.access_token}',
             'Content-Type': 'application/json'
         }
         self.onts = self.get_ontslist()
-
-    def get_token(self):
+    
+    def authenticate(self):
         endpoint = '/api/token'
-        request_url = f"{self.url}{endpoint}"
-        user_api = {
-            'username': self.username,
-            'password': self.password
-        }
-        response = requests.post(request_url, json=user_api)
-        response.raise_for_status()
-        return response.json()['access']
+        url = f"{self.url}{endpoint}"
 
+        payload = {
+            "username": self.username,
+            "password": self.password
+        }
+
+        response = requests.post(url, json=payload)
+        response.raise_for_status()
+
+        data = response.json()
+
+        self.access_token = data['access']
+        self.refresh_token = data['refresh']   
+    
+    def refresh_access_token(self):
+        endpoint = '/api/token/refresh'
+        url = f"{self.url}{endpoint}"
+
+        payload = {
+            "refresh": self.refresh_token
+        }
+
+        response = requests.post(url, json=payload)
+
+        if response.status_code != 200:
+            # Refresh token expired --> re-authenticate
+            self.authenticate()
+            return
+
+        data = response.json()
+        self.access_token = data['access']
+    
+    def request(self, method, endpoint, **kwargs):
+        url = f"{self.url}{endpoint}"
+
+        headers = kwargs.get("headers", {})
+        headers["Authorization"] = f"Bearer {self.access_token}"
+        headers["Content-Type"] = "application/json"
+
+        kwargs["headers"] = headers
+
+        response = requests.request(method, url, **kwargs)
+
+        # If refresh also fails (e.g., refresh token expired), it will re-authenticate in the refresh_access_token method
+        if response.status_code == 401:
+            print("🔄 Token expirado, renovando...")
+
+            self.refresh_access_token()
+
+            headers["Authorization"] = f"Bearer {self.access_token}"
+            response = requests.request(method, url, **kwargs)
+
+        response.raise_for_status()
+        return response.json()     
+
+    def get_ont(self, ont_id):
+        endpoint = f'/api/v2/ftth/equipment/{ont_id}'
+        return self.request('GET', endpoint)
+    
+    def get_all_onts(self):
+        endpoint = '/api/v2/ftth/equipment/list'
+        onts = []
+        response = self.request('GET', endpoint)
+        onts.extend(response['results']['id', 'device_alias', 'serial_number', 'macs'])
+
+        while response['next']:
+            endpoint = response['next'].replace(self.url, '')
+            response = self.request('GET', endpoint)
+            onts.extend(response['results']['id', 'device_alias', 'serial_number', 'macs'])
+
+        return onts
+    
     def get_ontslist(self):
         try:
             with open('onts.json', 'r') as infile:
@@ -51,41 +118,3 @@ class OltCloudAPI:
                     if input_value in ont.get('macs', []):
                         return ont.get('id')
         return None
-
-    def get_ont(self, ont_id):
-        endpoint = '/api/v2/ftth/equipment/{id}'.format(id=ont_id)
-        resquest_url = f"{self.url}{endpoint}"
-        #print(resquest_url)
-        try:
-            response = requests.get(resquest_url, headers=self.headers)
-            return response.json()
-        except requests.exceptions.HTTPError as http_err:
-            print(f"HTTP error occurred: {http_err}")  # Python 3.6+
-            print(f"Response content: {response.text}")
-        except Exception as err:
-            print(f"Other error occurred: {err}")
-    
-    def get_all_onts(self):
-        endpoint = '/api/v2/ftth/equipment/list'
-        resquest_url = f"{self.url}{endpoint}"
-        onts = []
-        try:
-            response = requests.get(resquest_url, headers=self.headers)
-            onts.extend(response.json()['results'])
-        except requests.exceptions.HTTPError as http_err:
-            print(f"HTTP error occurred: {http_err}")
-            print(f"Response content: {response.text}")
-        except Exception as err:
-            print(f"Other error occurred: {err}")
-        #count = 1
-        # Nexts Pages
-        while response.json()['next']:
-            resquest_url = f"{response.json()['next']}"
-            print(resquest_url)
-            response = requests.get(resquest_url, headers=self.headers)
-            onts.extend(response.json()['results'])
-            # Limit to 3 pages for testing
-            #count += 1
-            #if count >= 3:
-            #    break
-        return onts

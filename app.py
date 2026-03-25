@@ -1,6 +1,7 @@
 import API_OltCloud
 import streamlit as st
 
+@st.cache_resource
 def get_api():
     return API_OltCloud.OltCloudAPI()
 
