@@ -86,12 +86,27 @@ class OltCloudAPI:
         endpoint = '/api/v2/ftth/equipment/list'
         onts = []
         response = self.request('GET', endpoint)
-        onts.extend(response['results']['id', 'device_alias', 'serial_number', 'macs'])
-
+        onts.extend([
+            {
+                "id": item.get("id"),
+                "device_alias": item.get("device_alias"),
+                "serial_number": item.get("serial_number"),
+                "macs": item.get("macs", [])
+            }
+            for item in response.get("results", [])
+        ])
         while response['next']:
             endpoint = response['next'].replace(self.url, '')
             response = self.request('GET', endpoint)
-            onts.extend(response['results']['id', 'device_alias', 'serial_number', 'macs'])
+            onts.extend([
+                {
+                    "id": item.get("id"),
+                    "device_alias": item.get("device_alias"),
+                    "serial_number": item.get("serial_number"),
+                    "macs": item.get("macs", [])
+                }
+            for item in response.get("results", [])
+            ])
 
         return onts
     
