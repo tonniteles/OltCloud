@@ -61,6 +61,7 @@ with st.form(key='search_form', enter_to_submit=True, border=False):
         **Contrato:** {st.session_state.onu_info.get('device_alias').split('-')[0]}  
         **Serial:** {st.session_state.onu_info.get('serial_number')}  
         **ONU ID:** {st.session_state.onu_info.get('id')}  
+        **Model:** {st.session_state.onu_info.get('model')}  
         **MAC:** {', '.join(st.session_state.onu_info.get('macs', []))}
         """)
 
@@ -71,9 +72,6 @@ with st.form(key='search_form', enter_to_submit=True, border=False):
         **RX:** {st.session_state.onu_info.get('device_rx')} dBm  
         **TX:** {st.session_state.onu_info.get('device_tx')} dBm  
         **OLT RX:** {st.session_state.onu_info.get('olt_rx')} dBm  
-        """)
-
-        st.markdown(f"""
         **Temperatura:** {st.session_state.onu_info.get('temperature')} °C  
         **OLT:** {st.session_state.onu_info.get('olt')}  
         **SLOT/PON/ONU:** {st.session_state.onu_info.get('slot/pon/onu_id')}  

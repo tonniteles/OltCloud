@@ -10,7 +10,6 @@ class OltCloudAPI:
         self.url = os.environ.get("API_URL").split()[0] if os.environ.get("API_URL") is not None else ""
         self.username = os.environ.get("API_USER").split()[0] if os.environ.get("API_USER") is not None else ""
         self.password = os.environ.get("API_PASS").split()[0] if os.environ.get("API_PASS") is not None else ""
-        #self.token = self.get_token()
         self.access_token = None
         self.refresh_token = None
         self.authenticate()
@@ -86,6 +85,7 @@ class OltCloudAPI:
         endpoint = '/api/v2/ftth/equipment/list'
         onts = []
         response = self.request('GET', endpoint)
+        
         onts.extend([
             {
                 "id": item.get("id"),
@@ -95,6 +95,7 @@ class OltCloudAPI:
             }
             for item in response.get("results", [])
         ])
+        
         while response['next']:
             endpoint = response['next'].replace(self.url, '')
             response = self.request('GET', endpoint)
