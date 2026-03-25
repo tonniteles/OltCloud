@@ -22,7 +22,7 @@ sed -i 's/\r$//' .env
 
 Script to Start 
 -
-#!/bin/bash
+#!/bin/bash  
 source .venv/bin/activate  
 nohup python import_onus.py &  
 nohup streamlit run app.py --server.port 8500 &  
