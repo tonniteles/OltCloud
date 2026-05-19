@@ -27,3 +27,5 @@ source .venv/bin/activate
 nohup python import_onus.py &  
 nohup streamlit run app.py --server.port 8500 &  
 
+`import_onus.py` sincroniza a lista de ONUs para `onts.json` a cada 120 segundos (com escrita atómica e retentativas em caso de falha).
+
